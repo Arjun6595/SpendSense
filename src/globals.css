@@ -1,0 +1,883 @@
+/* Import Google Fonts for modern finance app look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Hide number input arrows (cross-browser) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield; /* Firefox */
+}
+
+/* Hide native password reveal or clear icons (Edge/IE) and suppress default decorations */
+input[type="password"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Chromium/Edge native password icons */
+input[type="password"]::-webkit-credentials-auto-fill-button,
+input[type="password"]::-webkit-textfield-decoration-container,
+input[type="password"]::-webkit-clear-button,
+input[type="password"]::-webkit-password-toggle-button {
+  visibility: hidden;
+  display: none !important;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+/* Color Variables from Canva Design */
+:root {
+  /* Primary Green Gradient Colors */
+  --primary-green-light: #7dd87d;
+  --primary-green-medium: #5cb85c;
+  --primary-green-dark: #4a9a4a;
+  
+  /* Background Gradient */
+  --bg-gradient-start: #8fdb8f;
+  --bg-gradient-end: #7dd87d;
+  
+  /* Accent Colors */
+  --accent-yellow: #f4d03f;
+  --accent-gold: #f7dc6f;
+  --money-green: #27ae60;
+  --success-green: #2ecc71;
+  
+  /* Text Colors */
+  --text-primary: #2c3e50;
+  --text-secondary: #34495e;
+  --text-light: #7f8c8d;
+  
+  /* Card Colors */
+  --card-bg: rgba(255, 255, 255, 0.95);
+  --card-shadow: rgba(0, 0, 0, 0.1);
+  --card-border: rgba(255, 255, 255, 0.2);
+
+  /* Tailwind CSS Variables for components */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+}
+
+/* Global Body Styling */
+body {
+  font-family: 'Inter', 'Poppins', sans-serif;
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Remove default gray background */
+.bg-gray-50 {
+  background: transparent !important;
+}
+
+/* Animated Money Background Pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='60' height='40' viewBox='0 0 60 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M10 10h40v20H10z' rx='3'/%3E%3Ccircle cx='30' cy='20' r='8'/%3E%3Ctext x='30' y='25' text-anchor='middle' font-size='10' fill='%23ffffff' fill-opacity='0.1'%3E$%3C/text%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 80px;
+  animation: floatMoney 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Disable the global pattern anywhere the app has nav/header */
+body.has-nav::before {
+  display: none !important;
+}
+
+/* Floating Money Animation */
+@keyframes floatMoney {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg) scale(1); 
+    opacity: 0.14;
+  }
+  25% { 
+    transform: translateY(-20px) rotate(5deg) scale(1.05); 
+    opacity: 0.2;
+  }
+  50% { 
+    transform: translateY(-10px) rotate(-3deg) scale(0.95); 
+    opacity: 0.16;
+  }
+  75% { 
+    transform: translateY(-25px) rotate(2deg) scale(1.02); 
+    opacity: 0.24;
+  }
+}
+
+/* Horizontal slow scroll for a parallax-like effect */
+@keyframes scrollMoney {
+  0% { background-position: 0 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* Reusable money background layer to force visibility on specific pages (e.g., login) */
+.money-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0; /* below content, above plain body background */
+  pointer-events: none;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='60' height='40' viewBox='0 0 60 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M10 10h40v20H10z' rx='3'/%3E%3Ccircle cx='30' cy='20' r='8'/%3E%3Ctext x='30' y='25' text-anchor='middle' font-size='10' fill='%23ffffff' fill-opacity='0.1'%3E$%3C/text%3E%3C/g%3E%3C/svg%3E");
+  background-size: 120px 80px;
+  animation: floatMoney 20s ease-in-out infinite;
+}
+
+/* Stronger variant for the login page */
+.money-bg--login {
+  /* Increase visibility and size for login */
+  z-index: 1; /* ensure it sits above body gradient */
+  background-image: 
+    url("data:image/svg+xml,%3Csvg width='60' height='40' viewBox='0 0 60 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%230f3e1a' fill-opacity='0.20'%3E%3Cpath d='M10 10h40v20H10z' rx='3'/%3E%3Ccircle cx='30' cy='20' r='8'/%3E%3Ctext x='30' y='25' text-anchor='middle' font-size='10' fill='%230f3e1a' fill-opacity='0.30'%3E$%3C/text%3E%3C/g%3E%3C/svg%3E");
+  background-size: 200px 120px;
+  animation: floatMoney 16s ease-in-out infinite, scrollMoney 40s linear infinite;
+}
+
+/* Additional floating animation for variety */
+@keyframes floatMoneyAlt {
+  0%, 100% { 
+    transform: translateX(0px) translateY(0px) rotate(0deg); 
+    opacity: 0.08;
+  }
+  33% { 
+    transform: translateX(10px) translateY(-15px) rotate(8deg); 
+    opacity: 0.12;
+  }
+  66% { 
+    transform: translateX(-5px) translateY(-8px) rotate(-5deg); 
+    opacity: 0.1;
+  }
+}
+
+/* Enhanced Card Styling */
+.bg-white {
+  background: var(--card-bg) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--card-border) !important;
+  box-shadow: 0 8px 32px var(--card-shadow) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Login form specific enhancements */
+.login-form-input {
+  @apply transition-all duration-200 ease-in-out;
+  @apply border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20;
+}
+
+.login-form-button {
+  @apply transition-all duration-200 ease-in-out;
+  @apply transform hover:scale-[1.02] active:scale-[0.98];
+}
+
+.login-form-link {
+  @apply transition-all duration-150 ease-in-out;
+  @apply hover:text-opacity-80;
+}
+
+/* Card-only lift opt-in: use .card on elements that should lift */
+.card {
+  background: var(--card-bg) !important;
+  border: 1px solid var(--card-border) !important;
+  box-shadow: 0 8px 32px var(--card-shadow) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Prevent hover lift on elements that opt-out */
+.no-hover-lift:hover {
+  /* Do not override transform here — keep centering transforms intact */
+  box-shadow: 0 8px 32px var(--card-shadow) !important;
+}
+/* Also disable hover transforms for interactive children inside opt-out containers */
+.no-hover-lift button:hover,
+.no-hover-lift [role="button"]:hover,
+.no-hover-lift a:hover {
+  transform: none !important;
+}
+
+/* Remove global lift from all .bg-white elements */
+/* Intentionally no hover overrides for .bg-white to avoid breaking centered modals */
+
+/* Disable hover-lift for navigation containers */
+.border-b.border-gray-200.bg-white:hover {
+  transform: none !important;
+  /* keep the same header shadow specified earlier */
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Disable hover-lift for mobile sidebar panel */
+.fixed.inset-y-0.left-0.flex.w-64.flex-col.bg-white.shadow-xl:hover {
+  transform: none !important;
+  /* keep the same sidebar shadow specified earlier */
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Enhanced Rounded Corners */
+.rounded-2xl {
+  border-radius: 16px !important;
+}
+
+.rounded-xl {
+  border-radius: 12px !important;
+}
+
+/* Button Styling with Green Theme */
+.bg-blue-600 {
+  background: linear-gradient(135deg, var(--primary-green-medium) 0%, var(--primary-green-dark) 100%) !important;
+  border: none;
+  box-shadow: 0 4px 15px rgba(92, 184, 92, 0.3);
+
+}
+
+.bg-blue-600:hover {
+  background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--money-green) 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(92, 184, 92, 0.4);
+}
+
+.bg-blue-100 {
+  background: rgba(125, 216, 125, 0.2) !important;
+}
+
+.text-blue-600, .text-blue-700 {
+  color: var(--primary-green-dark) !important;
+}
+
+/* Green Theme for Success Elements */
+.text-green-600 {
+  color: var(--success-green) !important;
+  font-weight: 600;
+}
+
+.bg-green-100 {
+  background: rgba(46, 204, 113, 0.15) !important;
+}
+
+/* Enhanced Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+}
+
+.text-2xl {
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+}
+
+.text-lg {
+  font-weight: 600 !important;
+}
+
+/* Enhanced Sidebar Styling */
+.lg\\:w-64 {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(125, 216, 125, 0.2) !important;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Sidebar background decoration */
+.lg\\:w-64::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(125, 216, 125, 0.03) 0%, transparent 50%, rgba(125, 216, 125, 0.02) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Sidebar content positioning */
+.lg\\:w-64 > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Mobile sidebar enhancement */
+.fixed.inset-y-0.left-0.flex.w-64.flex-col.bg-white.shadow-xl {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.95) 100%) !important;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Sidebar header styling */
+.flex.h-16.items-center.px-4 {
+  position: relative;
+  border-bottom: 1px solid rgba(125, 216, 125, 0.1);
+}
+
+.flex.h-16.items-center.px-4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary-green-medium), transparent);
+  opacity: 0.3;
+}
+
+.flex.h-16.items-center.px-4 h1 {
+  background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--money-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  animation: brandGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes brandGlow {
+  from {
+    filter: drop-shadow(0 0 5px rgba(125, 216, 125, 0.3));
+  }
+  to {
+    filter: drop-shadow(0 0 10px rgba(125, 216, 125, 0.5));
+  }
+}
+
+/* Remove money icon before header brand to prevent any ghosting */
+.flex.h-16.items-center.px-4 h1::before {
+  content: none !important;
+  animation: none !important;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+}
+
+/* Enhanced Header Bar */
+.border-b.border-gray-200.bg-white {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.95) 100%) !important;
+  /* remove blur to avoid compounding with background */
+  backdrop-filter: none !important;
+  border-bottom: 1px solid rgba(125, 216, 125, 0.2) !important;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* explicit opt-out utility if needed */
+.no-blur { backdrop-filter: none !important; }
+
+/* Header bar background decoration */
+.border-b.border-gray-200.bg-white::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(125, 216, 125, 0.02) 0%, transparent 50%, rgba(125, 216, 125, 0.02) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Header content positioning */
+.border-b.border-gray-200.bg-white > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Header title styling */
+.border-b.border-gray-200.bg-white h1 {
+  background: linear-gradient(135deg, var(--primary-green-dark) 0%, var(--money-green) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Header description styling */
+.border-b.border-gray-200.bg-white p {
+  color: var(--text-secondary);
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* Mobile menu button enhancement */
+button[type="button"].lg\\:hidden {
+  background: rgba(125, 216, 125, 0.1);
+  border: 1px solid rgba(125, 216, 125, 0.2);
+  border-radius: 8px;
+  padding: 8px;
+
+}
+
+button[type="button"].lg\\:hidden:hover {
+  background: rgba(125, 216, 125, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(125, 216, 125, 0.3);
+}
+
+button[type="button"].lg\\:hidden svg {
+  color: var(--primary-green-dark);
+
+}
+
+/* Mobile sidebar close button */
+.flex.h-16.items-center.justify-between.px-4 button {
+  background: rgba(231, 76, 60, 0.1);
+  border: 1px solid rgba(231, 76, 60, 0.2);
+  border-radius: 8px;
+  padding: 6px;
+
+}
+
+.flex.h-16.items-center.justify-between.px-4 button:hover {
+  background: rgba(231, 76, 60, 0.2);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.flex.h-16.items-center.justify-between.px-4 button svg {
+  color: #e74c3c;
+
+}
+
+/* Header container enhancement */
+.flex.h-16.items-center.gap-x-4 {
+  padding: 0 1.5rem;
+}
+
+/* Add subtle animation to header content */
+.flex-1 h1 {
+  animation: slideInFromLeft 0.6s ease-out;
+}
+
+.flex-1 p {
+  animation: slideInFromLeft 0.8s ease-out;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Pixel-Perfect Stat Card Icon Alignment */
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div {
+  /* Remove any potential background decorations */
+}
+
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div::before,
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div::after {
+  display: none !important;
+}
+
+/* Pixel-perfect icon alignment with number text middle */
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div .flex.items-center.justify-between {
+  align-items: center !important;
+}
+
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div .w-12.h-12 {
+  margin-left: 16px !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  align-self: center !important;
+}
+
+/* Ensure number text and icon are perfectly aligned */
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div .text-2xl {
+  line-height: 1.2 !important;
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+}
+
+/* Fix specific icon alignment issues */
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div .w-12.h-12 svg {
+  vertical-align: middle !important;
+  margin: 0 !important;
+  transform: translateY(0) !important;
+  position: relative !important;
+  top: 0 !important;
+}
+
+/* Ensure all icons have identical positioning */
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div .w-12.h-12 {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+
+/* Specific adjustment for Total Income card icon only */
+.total-income-card .w-12.h-12 {
+  margin-left: 22px !important;
+}
+
+.total-income-card .w-12.h-12 svg {
+  vertical-align: middle !important;
+}
+
+/* Ensure interactive elements stay on top */
+button, .hover\\:shadow-lg, [role="button"] {
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* Maintain proper layering for stat card content */
+.grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4 > div > div {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+/* Form Input Styling */
+input[type="number"], input[type="text"], input[type="email"], input[type="password"], select, textarea {
+  background: rgba(46, 177, 46, 0.2) !important;
+  border: 2px solid rgba(46, 177, 46, 0.2) !important;
+  border-radius: 12px !important;
+
+  font-family: 'Inter', sans-serif;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary-green-medium) !important;
+  box-shadow: 0 0 0 3px rgba(125, 216, 125, 0.1) !important;
+  outline: none !important;
+}
+
+/* Chart Container Enhancements */
+.recharts-wrapper {
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.recharts-pie-sector {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+
+}
+
+.recharts-bar-rectangle {
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
+}
+
+/* Chart tooltips */
+.recharts-default-tooltip {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Toast tweaks */
+/* Ensure toast uses white background regardless of theme vars */
+[data-sonner-toast], .radix-toast, .sonner-toast, .shadcn-toast, .shadcn-ui-toast {
+  background: #fff !important;
+}
+
+/* Enhanced Navigation Links */
+.group.flex.items-center.px-2.py-2.text-sm.font-medium.rounded-xl {
+  position: relative;
+  overflow: hidden;
+}
+
+
+
+/* Navigation Active States */
+.bg-blue-100.text-blue-700 {
+  background: linear-gradient(135deg, rgba(125, 216, 125, 0.25) 0%, rgba(125, 216, 125, 0.15) 100%) !important;
+  color: var(--primary-green-dark) !important;
+  border-left: 4px solid var(--primary-green-medium);
+  box-shadow: 0 4px 15px rgba(125, 216, 125, 0.3);
+  transform: translateX(2px);
+}
+
+.bg-blue-100.text-blue-700::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: var(--primary-green-medium);
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(125, 216, 125, 0.6);
+}
+
+/* Navigation icons enhancement */
+.group.flex.items-center.px-2.py-2.text-sm.font-medium.rounded-xl svg {
+
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+
+
+.bg-blue-100.text-blue-700 svg {
+  transform: scale(1.05);
+  filter: drop-shadow(0 2px 4px rgba(125, 216, 125, 0.4));
+}
+
+/* Money Icon Enhancements */
+.lucide-dollar-sign, .lucide-credit-card, .lucide-trending-up, .lucide-trending-down {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+/* Alert and Warning Colors */
+.text-red-600 {
+  color: #e74c3c !important;
+}
+
+.text-yellow-600 {
+  color: #f39c12 !important;
+}
+
+.bg-red-100 {
+  background: rgba(231, 76, 60, 0.1) !important;
+}
+
+.bg-yellow-100 {
+  background: rgba(243, 156, 18, 0.1) !important;
+}
+
+/* Loading and Transition Effects */
+.transition-all {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Smooth Fade-in Animation for Cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.space-y-6 > * {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.space-y-6 > *:nth-child(1) { animation-delay: 0.1s; }
+.space-y-6 > *:nth-child(2) { animation-delay: 0.2s; }
+.space-y-6 > *:nth-child(3) { animation-delay: 0.3s; }
+.space-y-6 > *:nth-child(4) { animation-delay: 0.4s; }
+
+/* Enhanced Shadows for Depth */
+.shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+.shadow-md {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Progress Bar Styling (for budget indicators) */
+.progress-bar {
+  background: linear-gradient(90deg, var(--success-green) 0%, var(--primary-green-light) 100%);
+  border-radius: 10px;
+  height: 8px;
+  transition: width 0.8s ease-in-out;
+}
+
+/* Mobile Responsiveness Enhancements */
+@media (max-width: 768px) {
+  body::before {
+    background-size: 80px 60px;
+  }
+  
+  .bg-white {
+    margin: 0 4px;
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, var(--primary-green-medium), var(--primary-green-dark));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, var(--primary-green-dark), var(--money-green));
+}
+
+/* Special Money Symbol Styling */
+.currency-symbol {
+  color: var(--money-green);
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Glassmorphism Effect for Important Cards */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+/* Hover Effects for Interactive Elements */
+button, .cursor-pointer {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Opt-in hover lift for buttons */
+.btn-hover-lift:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+/* Disable button hover lift inside opt-out containers (e.g., dialogs) */
+.no-hover-lift .btn-hover-lift:hover:not(:disabled) {
+  transform: none !important;
+}
+
+/* Success and Error Message Styling */
+.success-message {
+  background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(46, 204, 113, 0.05) 100%);
+  border-left: 4px solid var(--success-green);
+  color: var(--success-green);
+}
+
+.error-message {
+  background: linear-gradient(135deg, rgba(231, 76, 60, 0.1) 0%, rgba(231, 76, 60, 0.05) 100%);
+  border-left: 4px solid #e74c3c;
+  color: #e74c3c;
+}
+
+/* Enhanced Focus States for Accessibility */
+*:focus {
+  outline: 2px solid var(--primary-green-medium);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  body::before {
+    display: none;
+  }
+  
+  .bg-white {
+    background: white !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Disable ALL hover animations and transforms for .no-hover links */
+.no-hover,
+.no-hover:hover,
+.no-hover:focus,
+.no-hover:active {
+  transition: none !important;
+  transform: none !important;
+  background: inherit !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  animation: none !important;
+  filter: none !important;
+  cursor: pointer;
+}
+
+/* Remove unwanted blurred icon before SpendSense */
+h1.text-xl.font-extrabold.text-\[var\(--primary-green-dark\)\].tracking-tight::before {
+    content: none !important;
+}
+h1.text-xl.font-extrabold.text-\[var\(--primary-green-dark\)\].tracking-tight::before {
+    content: none !important;
+}
