@@ -105,25 +105,25 @@ export function BudgetProvider({ children, user }) {
   // Keyed local backup per user + legacy key for safety
   const localKey = user ? `budgetTrackerData:${user.uid}` : null
 
-  // Reset on logout and clear localStorage
+  // Reset on logout but preserve localStorage as backup
   useEffect(() => {
     if (!user) {
-      console.log('User logged out, clearing data and localStorage') // Debug log
+      console.log('🚪 User logged out, clearing in-memory data only') // Debug log
+      console.log('📦 localStorage contents before logout:', {
+        budgetTrackerData: localStorage.getItem('budgetTrackerData'),
+        allKeys: Object.keys(localStorage).filter(k => k.includes('budget'))
+      })
       dispatch({ type: "CLEAR_ALL_DATA" })
-      // Clear all localStorage data
-      try {
-        if (typeof window !== "undefined") {
-          // Clear all budgetTrackerData entries
-          const keys = Object.keys(localStorage).filter(k => k.startsWith("budgetTrackerData"))
-          keys.forEach(key => localStorage.removeItem(key))
-          console.log('Cleared localStorage keys:', keys) // Debug log
-        }
-      } catch (e) {
-        console.error('Error clearing localStorage:', e)
-      }
+      // Keep localStorage as backup - don't clear it!
+      // This ensures data survives logout/login cycles
       setLoading(false)
     } else {
-      console.log('User logged in:', user.uid) // Debug log
+      console.log('🔑 User logged in:', user.uid) // Debug log
+      console.log('📦 localStorage contents after login:', {
+        userSpecific: localStorage.getItem(`budgetTrackerData:${user.uid}`),
+        general: localStorage.getItem('budgetTrackerData'),
+        allKeys: Object.keys(localStorage).filter(k => k.includes('budget'))
+      })
     }
   }, [user])
 
@@ -134,19 +134,25 @@ export function BudgetProvider({ children, user }) {
       if (!user) return
       try {
         setLoading(true)
-        console.log('Starting data hydration for user:', user.uid) // Debug log
+        console.log('🔄 Starting data hydration for user:', user.uid)
         
         const ref = doc(db, "budgets", user.uid)
         const snap = await getDoc(ref)
         
         if (snap.exists()) {
-          console.log('Found existing data in Firestore:', snap.data()) // Debug log
+          console.log('📥 Found Firestore data, loading...')
           const firestoreData = normalizeData(snap.data())
           
-          // Always use Firestore data as the source of truth when it exists
+          console.log('📊 Firestore data summary:', {
+            income: firestoreData.income,
+            expenses: firestoreData.expenses?.length || 0,
+            categories: firestoreData.categories?.length || 0,
+            budgetLimits: Object.keys(firestoreData.budgetLimits || {}).length
+          })
+          
           if (isMounted) {
             dispatch({ type: "LOAD_DATA", payload: firestoreData })
-            console.log('Loaded Firestore data:', firestoreData) // Debug log
+            console.log('✅ Loaded data from Firestore')
           }
           
           // Update localStorage with Firestore data
@@ -154,111 +160,120 @@ export function BudgetProvider({ children, user }) {
             if (typeof window !== "undefined") {
               localStorage.setItem(localKey, JSON.stringify(firestoreData))
               localStorage.setItem("budgetTrackerData", JSON.stringify(firestoreData))
-              console.log('Updated localStorage with Firestore data') // Debug log
+              console.log('💾 Updated localStorage with Firestore data')
             }
           } catch (e) {
-            console.error('Error updating localStorage:', e)
+            console.error('❌ Error updating localStorage:', e)
           }
         } else {
-          console.log('No Firestore data found, checking for legacy data') // Debug log
-          // Fallback to legacy collection name "budget"
-          const legacyRef = doc(db, "budget", user.uid)
-          const legacySnap = await getDoc(legacyRef)
+          console.log('🔍 No Firestore data found, checking localStorage...')
+          // No Firestore data, check localStorage for existing data
+          let localData = null
           
-          if (legacySnap.exists()) {
-            console.log('Found legacy data, migrating to new collection') // Debug log
-            const legacyData = normalizeData(legacySnap.data())
-            try { await setDoc(ref, legacyData, { merge: true }) } catch {}
-            
-            if (isMounted) dispatch({ type: "LOAD_DATA", payload: legacyData })
-            
+          // Check user-specific localStorage first
+          try {
+            if (typeof window !== "undefined") {
+              const userSpecificData = localStorage.getItem(localKey)
+              if (userSpecificData) {
+                localData = JSON.parse(userSpecificData)
+                console.log('📦 Found user-specific localStorage data:', {
+                  expenses: localData?.expenses?.length || 0,
+                  income: localData?.income || 0,
+                  categories: localData?.categories?.length || 0
+                })
+              }
+            }
+          } catch (e) {
+            console.error('❌ Error parsing user-specific localStorage:', e)
+          }
+          
+          // Fallback to general localStorage
+          if (!localData) {
             try {
               if (typeof window !== "undefined") {
-                localStorage.setItem(localKey, JSON.stringify(legacyData))
-                localStorage.setItem("budgetTrackerData", JSON.stringify(legacyData))
-              }
-            } catch {}
-          } else {
-            console.log('No cloud data found, checking localStorage backups') // Debug log
-            // Create initial doc using local backup if available, otherwise defaults
-            let seed = null
-            
-            // Check for user-specific localStorage first
-            try { 
-              if (typeof window !== "undefined") {
-                seed = JSON.parse(localStorage.getItem(localKey) || "null")
-                console.log('Found user-specific localStorage:', seed) // Debug log
-              }
-            } catch {}
-            
-            // Fallback to general localStorage
-            if (!seed) {
-              try { 
-                if (typeof window !== "undefined") {
-                  seed = JSON.parse(localStorage.getItem("budgetTrackerData") || "null")
-                  console.log('Found general localStorage:', seed) // Debug log
+                const generalData = localStorage.getItem("budgetTrackerData")
+                if (generalData) {
+                  localData = JSON.parse(generalData)
+                  console.log('📦 Found general localStorage data as fallback')
                 }
-              } catch {}
-            }
-            
-            // Find any other backup
-            if (!seed) {
-              seed = findAnyLocalBackup()
-              console.log('Found backup localStorage:', seed) // Debug log
-            }
-            
-            // Use defaults if no data found
-            if (!seed) {
-              seed = { ...initialState }
-              console.log('Using default initial state') // Debug log
-            }
-            
-            seed = normalizeData(seed)
-
-            // Save to Firestore as the initial data for this user
-            try { 
-              await setDoc(ref, seed, { merge: true })
-              console.log('Created initial Firestore document with data:', seed) // Debug log
+              }
             } catch (e) {
-              console.error('Error creating initial Firestore document:', e)
+              console.error('❌ Error parsing general localStorage:', e)
             }
-
-            if (isMounted) dispatch({ type: "LOAD_DATA", payload: seed })
+          }
+          
+          // If we have meaningful localStorage data, use it and sync to Firestore
+          if (localData && (localData.expenses?.length > 0 || localData.income > 0)) {
+            console.log('✅ Using localStorage data with user content')
+            localData = normalizeData(localData)
+            
+            // Sync to Firestore
+            try {
+              await setDoc(ref, localData, { merge: true })
+              console.log('🔄 Synced localStorage data to Firestore')
+            } catch (e) {
+              console.error('❌ Error syncing to Firestore:', e)
+            }
+            
+            if (isMounted) {
+              dispatch({ type: "LOAD_DATA", payload: localData })
+              console.log('✅ Loaded data from localStorage backup')
+            }
+          } else {
+            // No meaningful data found, use defaults
+            console.log('📋 No existing data found, using defaults')
+            const defaultData = normalizeData(initialState)
             
             try {
+              await setDoc(ref, defaultData, { merge: true })
+              console.log('🔄 Created initial Firestore document')
+            } catch (e) {
+              console.error('❌ Error creating initial Firestore document:', e)
+            }
+            
+            if (isMounted) {
+              dispatch({ type: "LOAD_DATA", payload: defaultData })
+              console.log('✅ Loaded default data')
+            }
+            
+            // Update localStorage
+            try {
               if (typeof window !== "undefined") {
-                localStorage.setItem(localKey, JSON.stringify(seed))
-                localStorage.setItem("budgetTrackerData", JSON.stringify(seed))
-                console.log('Updated localStorage with initial data') // Debug log
+                localStorage.setItem(localKey, JSON.stringify(defaultData))
+                localStorage.setItem("budgetTrackerData", JSON.stringify(defaultData))
               }
-            } catch {}
+            } catch (e) {
+              console.error('❌ Error updating localStorage with defaults:', e)
+            }
           }
         }
       } catch (e) {
-        console.error('Error during data hydration:', e) // Debug log
-        // On error: attempt local backups
-        let localData = null
-        try { 
-          if (typeof window !== "undefined") {
-            localData = JSON.parse(localStorage.getItem(localKey) || "null")
-            console.log('Fallback to user-specific localStorage:', localData) // Debug log
-          }
-        } catch {}
+        console.error('❌ Error during data hydration:', e)
+        // On error, try to load from localStorage as fallback
+        let fallbackData = null
         
-        if (!localData) {
-          try { 
-            if (typeof window !== "undefined") {
-              localData = JSON.parse(localStorage.getItem("budgetTrackerData") || "null")
-              console.log('Fallback to general localStorage:', localData) // Debug log
+        try {
+          if (typeof window !== "undefined") {
+            const userData = localStorage.getItem(localKey)
+            if (userData) {
+              fallbackData = normalizeData(JSON.parse(userData))
+            } else {
+              const generalData = localStorage.getItem("budgetTrackerData")
+              if (generalData) {
+                fallbackData = normalizeData(JSON.parse(generalData))
+              }
             }
-          } catch {}
+          }
+        } catch (localError) {
+          console.error('❌ Error loading fallback data:', localError)
         }
         
-        if (localData) {
-          if (isMounted) dispatch({ type: "LOAD_DATA", payload: localData })
+        if (fallbackData && isMounted) {
+          dispatch({ type: "LOAD_DATA", payload: fallbackData })
+          console.log('✅ Loaded fallback data from localStorage')
         } else if (isMounted) {
-          console.log('No fallback data available, using defaults') // Debug log
-          dispatch({ type: "CLEAR_ALL_DATA" })
+          dispatch({ type: "LOAD_DATA", payload: normalizeData(initialState) })
+          console.log('✅ Loaded default data as final fallback')
         }
       } finally {
         if (isMounted) setLoading(false)
@@ -280,7 +295,7 @@ export function BudgetProvider({ children, user }) {
     } catch {}
   }, [state, user, localKey, loading])
 
-  // Persist to Firestore after initial loading
+  // Persist to Firestore after initial loading with retry logic
   useEffect(() => {
     if (!user) return
     if (loading) return
@@ -289,10 +304,11 @@ export function BudgetProvider({ children, user }) {
         const ref = doc(db, "budgets", user.uid)
         console.log('Saving data to Firestore for user:', user.uid) // Debug log
         await setDoc(ref, state, { merge: true })
-        console.log('Data saved successfully') // Debug log
+        console.log('Data saved successfully to Firestore') // Debug log
       } catch (e) {
         console.error("Error saving to Firestore:", e) // Debug log
-        // Swallow; local backup already saved
+        console.log('Firestore save failed, but localStorage backup preserved') // Debug log
+        // Don't clear localStorage on Firestore errors - keep it as backup
       }
     }
     persist()
