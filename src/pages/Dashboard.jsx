@@ -8,6 +8,34 @@ export default function Dashboard() {
   const { income, totalExpenses, remainingBudget, categoryExpenses, settings } = useBudget()
 
   const exceededBudgets = categoryExpenses.filter((cat) => cat.budget > 0 && cat.spent > cat.budget).length
+  
+  // Calculate total exceeded amount across all categories
+  const totalExceededAmount = categoryExpenses
+    .filter((cat) => cat.budget > 0 && cat.spent > cat.budget)
+    .reduce((sum, cat) => sum + (cat.spent - cat.budget), 0)
+    
+  // Determine exceeded budget card properties
+  const getExceededBudgetCardProps = () => {
+    if (exceededBudgets > 0) {
+      return {
+        title: "Exceeded Budget",
+        value: exceededBudgets,
+        icon: AlertTriangle,
+        color: "text-red-600",
+        showCurrency: false
+      }
+    } else {
+      return {
+        title: "Active Categories",
+        value: categoryExpenses.filter((cat) => cat.spent > 0).length,
+        icon: Grid2x2Icon,
+        color: "text-blue-600",
+        showCurrency: false
+      }
+    }
+  }
+  
+  const exceededBudgetCardProps = getExceededBudgetCardProps()
 
   const pieData = categoryExpenses
     .filter((category) => category.spent > 0)
@@ -32,8 +60,12 @@ export default function Dashboard() {
         <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
         <div className="flex items-center justify-between">
           <p className={`text-2xl font-bold ${color} flex-1`}>
-            {showCurrency && settings.currency}
-            {Math.abs(value).toLocaleString()}
+            {showCurrency && typeof value === 'number' && settings.currency}
+            {typeof value === 'number' && value < 0 && showCurrency ? "-" : ""}
+            {typeof value === 'number' ? 
+              (showCurrency ? Math.abs(value).toLocaleString() : value.toLocaleString()) : 
+              value
+            }
           </p>
           <div
             className={`w-12 h-12 flex items-center justify-center rounded-xl flex-shrink-0 ml-4 ${
@@ -43,7 +75,9 @@ export default function Dashboard() {
                   ? "bg-red-100"
                   : color === "text-yellow-600"
                     ? "bg-yellow-100"
-                    : "bg-blue-100"
+                    : color === "text-orange-600"
+                      ? "bg-orange-100"
+                      : "bg-blue-100"
             }`}
           >
             <Icon className={`h-6 w-6 ${color}`} />
@@ -71,22 +105,16 @@ export default function Dashboard() {
           <StatCard
             title="Remaining Budget"
             value={remainingBudget}
-            icon={TrendingUp}
+            icon={remainingBudget >= 0 ? TrendingUp : TrendingDown}
             color={remainingBudget >= 0 ? "text-green-600" : "text-red-600"}
           />
+          
           <StatCard
-            title="Categories"
-            value={categoryExpenses.filter((cat) => cat.spent > 0).length}
-            icon={Grid2x2Icon}
-            color="text-blue-600"
-            showCurrency={false}
-          />
-          <StatCard
-            title="Exceeded Budgets"
-            value={exceededBudgets}
-            icon={AlertTriangle}
-            color="text-yellow-600"
-            showCurrency={false}
+            title={exceededBudgetCardProps.title}
+            value={exceededBudgetCardProps.value}
+            icon={exceededBudgetCardProps.icon}
+            color={exceededBudgetCardProps.color}
+            showCurrency={exceededBudgetCardProps.showCurrency}
           />
         </div>
 
@@ -105,14 +133,18 @@ export default function Dashboard() {
                       cy="50%"
                       innerRadius={60}
                       outerRadius={100}
-                      paddingAngle={5}
+                      paddingAngle={pieData.length > 5 ? 2 : 5}
+                      minAngle={15}
                       dataKey="value"
                     >
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => [`${settings.currency}${value}`, "Amount"]} />
+                    <Tooltip formatter={(value, name) => {
+                      const percentage = totalExpenses > 0 ? ((value / totalExpenses) * 100).toFixed(1) : 0
+                      return [`${settings.currency}${value} (${percentage}%)`, "Amount"]
+                    }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -121,18 +153,24 @@ export default function Dashboard() {
             )}
             {/* Legend */}
             <div className="mt-4 space-y-2">
-              {pieData.map((entry, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: entry.color }} />
-                    <span className="text-sm text-gray-600">{entry.name}</span>
+              {pieData.map((entry, index) => {
+                const percentage = totalExpenses > 0 ? ((entry.value / totalExpenses) * 100).toFixed(1) : 0
+                return (
+                  <div key={index} className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: entry.color }} />
+                      <span className="text-sm text-gray-600">{entry.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-medium">
+                        {settings.currency}
+                        {entry.value.toLocaleString()}
+                      </span>
+                      <span className="text-xs text-gray-500 ml-1">({percentage}%)</span>
+                    </div>
                   </div>
-                  <span className="text-sm font-medium">
-                    {settings.currency}
-                    {entry.value.toLocaleString()}
-                  </span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
 
@@ -147,7 +185,7 @@ export default function Dashboard() {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip formatter={(value) => [`${settings.currency}${value}`, ""]} />
-<Bar dataKey="spent" name="Spent">
+                    <Bar dataKey="spent" name="Spent">
                       {barData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
